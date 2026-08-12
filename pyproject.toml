@@ -19,6 +19,7 @@ suj = "suj.server:main"
 
 [dependency-groups]
 dev = [
+    "bandit",
     "okf-parser @ git+https://github.com/franklinbaldo/okf-parser@8cf97286868aafd8fbda8e82f7b32bf342324fdd",
     "pip-audit",
     "pytest",
@@ -26,6 +27,7 @@ dev = [
     "pytest-cov",
     "ruff",
     "ty",
+    "vulture",
 ]
 
 [build-system]

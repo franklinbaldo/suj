@@ -27,18 +27,22 @@ produzir efeitos jurídicos irreversíveis.
 - Ruff para lint e formatação
 - ty para verificação estática de tipos
 - pytest e pytest-cov para testes
+- Vulture e Bandit para dead code e análise estática de segurança
+- pip-audit para vulnerabilidades conhecidas nas dependências
 
 ## Desenvolvimento
 
 ```console
 uv sync --dev
 uv run suj
-uv run ruff check .
-uv run ruff format --check .
-uv run ty check src
-uv run pytest
-uv run okf-parser check . --require-spec "specs/okf-types/{slug}.md" --normative-spec
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1
 ```
+
+Esse comando é a catraca canônica, idêntica à executada pelo CI: ambiente
+travado pelo lockfile, Ruff e sua dívida de isenções, tipos, dead code,
+segurança estática, testes com cobertura de branch, OKF e auditoria de
+dependências. A suíte também rejeita rede externa, segredos versionados e tools
+sem contrato de objeto tipado.
 
 O servidor inicial publica apenas `suj_status`, sem rede e sem operações de
 escrita.

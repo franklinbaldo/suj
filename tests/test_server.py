@@ -48,6 +48,18 @@ async def test_two_builds_are_independent_and_structurally_identical() -> None:
     ]
 
 
+async def test_every_public_tool_has_a_typed_object_contract() -> None:
+    """The catalog cannot grow a legacy dict, list or absent output schema."""
+    async with Client(build_mcp()) as client:
+        tools = await client.list_tools()
+
+    assert tools
+    for tool in tools:
+        assert tool.outputSchema is not None, tool.name
+        assert tool.outputSchema.get("type") == "object", tool.name
+        assert tool.outputSchema.get("additionalProperties") is False, tool.name
+
+
 async def test_explicit_settings_are_visible_without_enabling_effects() -> None:
     """Status reports flags; it does not interpret them as authorization."""
     server = build_mcp(Settings(network_enabled=True, writes_enabled=False))
