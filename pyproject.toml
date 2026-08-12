@@ -20,6 +20,7 @@ suj = "suj.server:main"
 [dependency-groups]
 dev = [
     "okf-parser @ git+https://github.com/franklinbaldo/okf-parser@8cf97286868aafd8fbda8e82f7b32bf342324fdd",
+    "pip-audit",
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
@@ -50,3 +51,8 @@ testpaths = ["tests"]
 [tool.coverage.run]
 branch = true
 source = ["suj"]
+omit = ["src/suj/server.py"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
