@@ -42,6 +42,9 @@ uv run pytest
 O servidor inicial publica apenas `suj_status`, sem rede e sem operações de
 escrita.
 
+As decisões de fundação, incluindo as lições extraídas dos MCPs `pink` e
+`todos`, estão no [RFC 0001](docs/rfc/0001-foundation.md).
+
 ## Licença
 
 MIT. Consulte [LICENSE](LICENSE).
