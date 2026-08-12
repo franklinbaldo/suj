@@ -1,0 +1,47 @@
+{
+  "nivelSigilo": 0,
+  "siglaTribunal": "TJEX",
+  "numeroProcesso": "0000000-00.2026.8.00.0000",
+  "tramitacaoAtual": {
+    "idOrigem": "SYNTHETIC-ORIGIN-1",
+    "dataHoraAjuizamento": "2026-01-02T03:04:05",
+    "grau": {"sigla": "G1", "numero": 1},
+    "valorAcao": 12000000.0,
+    "classe": [{"codigo": 999001, "descricao": "Classe inteiramente sintética"}],
+    "distribuicao": [
+      {
+        "orgaoJulgador": [
+          {"id": 999002, "nome": "UNIDADE JUDICIAL SINTÉTICA"}
+        ]
+      }
+    ],
+    "assunto": [{"codigo": 999003, "descricao": "Assunto sintético"}],
+    "partes": [
+      {
+        "polo": "ATIVO",
+        "nome": "PESSOA SINTÉTICA ATIVA",
+        "representantes": [
+          {
+            "tipoRepresentacao": "ADVOGADO",
+            "nome": "REPRESENTANTE SINTÉTICO",
+            "cadastroReceitaFederal": []
+          },
+          {
+            "tipoRepresentacao": "OUTRO",
+            "nome": "ÓRGÃO SINTÉTICO",
+            "cadastroReceitaFederal": []
+          }
+        ]
+      },
+      {
+        "polo": "PASSIVO",
+        "nome": "PESSOA SINTÉTICA PASSIVA",
+        "documentosPrincipais": [{"numero": "00000000000000", "tipo": "CNPJ"}],
+        "representantes": []
+      }
+    ],
+    "tribunal": {"sigla": "TJEX", "jtr": "800"},
+    "permitePeticionar": true,
+    "idFonteDadosCodex": 999004
+  }
+}
