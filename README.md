@@ -37,6 +37,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run ty check src
 uv run pytest
+uv run okf-parser check . --require-spec "specs/okf-types/{slug}.md" --normative-spec
 ```
 
 O servidor inicial publica apenas `suj_status`, sem rede e sem operações de

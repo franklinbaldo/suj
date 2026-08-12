@@ -1,0 +1,9 @@
+# Root project files are not concepts in the OKF bundle.
+/*.md
+
+# Local and generated artifacts.
+/.git/
+/.venv/
+/.ruff_cache/
+/.pytest_cache/
+/.generated/

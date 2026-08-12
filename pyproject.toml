@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 license = "MIT"
 authors = [{ name = "Franklin Baldo" }]
 dependencies = [
-    "fastmcp",
+    "fastmcp>=3.4.5,<4",
     "httpx",
     "keyring",
     "pydantic>=2",
@@ -19,7 +19,9 @@ suj = "suj.server:main"
 
 [dependency-groups]
 dev = [
+    "okf-parser @ git+https://github.com/franklinbaldo/okf-parser@8cf97286868aafd8fbda8e82f7b32bf342324fdd",
     "pytest",
+    "pytest-asyncio",
     "pytest-cov",
     "ruff",
     "ty",
@@ -42,6 +44,7 @@ ignore = ["COM812", "D203", "D213"]
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers"
+asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.coverage.run]

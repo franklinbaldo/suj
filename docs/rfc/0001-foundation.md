@@ -1,9 +1,13 @@
-# RFC 0001 — Fundação arquitetural do `suj`
+---
+type: RFC
+number: 1
+status: proposed
+date: 2026-08-12
+title: Fundação arquitetural do suj
+author: Franklin Baldo
+---
 
-- Status: proposta
-- Data: 2026-08-12
-- Autor: Franklin Baldo
-- Escopo: arquitetura inicial, contratos, segurança e processo de evolução
+# RFC 0001 — Fundação arquitetural do `suj`
 
 ## Resumo
 
@@ -112,6 +116,12 @@ introspecção -> build_mcp()
 - Duas chamadas consecutivas a `build_mcp()` DEVEM produzir catálogos
   estruturalmente idênticos e servidores independentes.
 
+Recursos compartilhados serão inicializados por lifespan nativo do FastMCP,
+sempre com cleanup em `try/finally`. Dependências por request serão declaradas
+com `Depends()`; por serem injetadas, não aparecem no schema que o agente vê.
+Não criaremos service locator ou contexto próprio para substituir esses dois
+mecanismos.
+
 ### 3. Fronteiras de código
 
 ```text
@@ -142,6 +152,12 @@ src/suj/
 - Resultados com variantes reais DEVEM usar união discriminada.
 - Nomes wire serão definidos uma vez no modelo e testados contra o schema
   publicado.
+- O default de dereference de schemas do FastMCP será mantido. Só será
+  desabilitado se um consumidor real demonstrar suporte correto a `$ref` e o
+  ganho de tamanho justificar a divergência.
+- `ToolResult` só será usado quando houver necessidade concreta de combinar
+  content blocks, structured content e metadata. O default permanece retornar
+  diretamente o modelo tipado.
 
 ### 5. Verdade sobre estado remoto
 
@@ -176,6 +192,12 @@ exigirá RFC própria contendo, no mínimo:
 
 `destructiveHint` é informação para o host; NÃO é enforcement suficiente.
 
+Em stdio, os checks OAuth de autorização do FastMCP não são executados porque
+esse transporte não possui contexto OAuth. Portanto, uma policy de escrita do
+`suj` nunca poderá depender deles. Se houver transporte HTTP no futuro,
+autenticação e autorização usarão providers e auth checks nativos do FastMCP,
+mas continuarão complementares às garantias executáveis de domínio.
+
 ### 7. HTTP deliberado
 
 - Um único client assíncrono será criado no lifespan e injetado nos casos de
@@ -187,6 +209,11 @@ exigirá RFC própria contendo, no mínimo:
 - Redirects, hosts permitidos e limites de tamanho serão políticas explícitas.
 - DTO remoto e modelo público serão tipos diferentes quando suas semânticas
   diferirem; o formato acidental do upstream não será o contrato MCP.
+- Toda tool que possa esperar rede terá `timeout` nativo do FastMCP, além dos
+  timeouts de conexão/leitura/escrita do HTTPX.
+- Um deployment HTTP deverá configurar explicitamente hosts e origins
+  confiáveis. Não dependerá do comportamento default de uma patch release para
+  proteção contra DNS rebinding.
 
 ### 8. Credenciais
 
@@ -200,6 +227,10 @@ exigirá RFC própria contendo, no mínimo:
   possuir um Bearer observado manualmente.
 - Expiração será reportada honestamente; ausência e expiração serão erros
   distintos.
+
+Erros inesperados serão mascarados na fronteira MCP. Somente erros de domínio
+deliberadamente seguros para o agente serão convertidos em `ToolError`; detalhes
+internos continuam disponíveis apenas em logging redigido.
 
 ### 9. Dados e privacidade
 
@@ -227,6 +258,75 @@ compatibilidade só poderão existir para consumidores reais identificados.
 O catálogo será pequeno. Antes de adicionar uma tool, deve-se provar que ela
 representa capability distinta, e não apenas outra combinação de parâmetros.
 
+### 11. OKF para conhecimento e dados
+
+O repositório será um bundle Open Knowledge Format (OKF) v0.2 validado pelo
+`okf-parser`. O uso segue duas modalidades distintas.
+
+#### Conhecimento autoral
+
+Documentação, RFCs, changelogs, especificações de tipos e conhecimento de
+domínio durável serão conceitos Markdown com frontmatter OKF explícito.
+
+- Todo conceito não reservado DEVE declarar `type` não vazio.
+- Cada tipo em uso DEVE possuir specification derivada em
+  `specs/okf-types/{slug}.md`.
+- A ausência de specification será erro normativo desde o início, não warning.
+- `index.md` será usado como documento reservado de navegação progressiva.
+- Links Markdown serão relações intencionais do grafo, não ornamentação.
+- Campos adicionais de frontmatter são permitidos, mas sua semântica deve ser
+  declarada na specification do tipo quando houver consumidor.
+- `.okfignore`, e não `.gitignore`, define o que fica fora do bundle.
+
+Dados operacionais remotos, tokens, documentos, respostas HTTP e identificadores
+reais NÃO são conhecimento autoral e NÃO serão materializados no bundle.
+Conhecimento derivado de observação deve registrar proveniência sem copiar o
+payload sensível que serviu de fonte.
+
+#### Projeção derivada do runtime
+
+Quando o catálogo crescer, o `suj` gerará em `.generated/okf-mcp/` uma projeção
+determinística do servidor FastMCP vivo. Ela poderá representar, conforme houver
+consumidor real:
+
+- `MCPTool`;
+- `ResponseModel`;
+- `RemoteOperation`;
+- relações entre tool, contrato e operação remota;
+- efeitos e evidências de segurança.
+
+A projeção é descartável e reconstruível; não é fonte de verdade nem dependência
+de runtime. O catálogo FastMCP e os modelos Python continuam autoritativos.
+Fatos que o FastMCP expõe estruturadamente devem ser lidos dele, preferencialmente
+por client in-process. Inferência AST só será aceita para uma relação que o
+runtime não exponha, com proveniência explícita e teste de paridade.
+
+O bundle gerado será validado com specifications normativas, materializado em
+relações tipadas e submetido apenas a auditorias com pergunta concreta. Não
+criaremos taxonomia ou SQL sem consumidor e invariante identificados.
+
+#### Fronteira de adaptação
+
+Fonte externa e OKF autoral não são a mesma coisa. Se CSV, JSON, fixtures ou
+outro corpus forem projetados para OKF, um adapter separado deverá declarar:
+
+- a fonte;
+- a política de identidade;
+- quais campos são observados e quais são derivados;
+- a transformação de relações;
+- a política de conflito e atualização.
+
+Depois da adaptação, os consumidores operam somente sobre a representação OKF
+canônica. O parser, o grafo e as auditorias não aprenderão dialetos de cada
+fonte individualmente.
+
+#### Preview antes de escrita
+
+O modelo do `okf-parser` — inspeção e preview disponíveis por default, commit
+habilitado separadamente — reforça a política de efeitos deste RFC. Isso não
+autoriza escrita judicial, mas estabelece a mesma direção: preparação e efeito
+são capabilities diferentes, e annotations nunca substituem autorização.
+
 ## Configuração
 
 Configuração não secreta usará `pydantic-settings`, prefixo `SUJ_` e validação
@@ -253,7 +353,15 @@ O CI terá um único script local canônico e executará:
 7. snapshot estrutural do catálogo, sem congelar descrições editoriais;
 8. verificação de que todos os modelos públicos geram `outputSchema` útil;
 9. teste de que erros não retornam conteúdo com formato de sucesso;
-10. teste de ausência de rede em toda a suíte unitária.
+10. teste de ausência de rede em toda a suíte unitária;
+11. `okf-parser check . --require-spec 'specs/okf-types/{slug}.md'
+    --normative-spec`;
+12. auditorias relacionais OKF específicas, quando existirem.
+
+Os testes de contrato MCP usarão `fastmcp.Client` diretamente sobre a instância
+in-process e `pytest-asyncio` com `asyncio_mode = "auto"`. Chamar a função Python
+diretamente continua útil para unidade de domínio, mas não substitui atravessar
+o schema, a validação, o middleware e o lifecycle reais do servidor.
 
 Mocks devem devolver os mesmos modelos usados em produção. É proibido manter
 stub `dict` depois que o contrato real virou Pydantic: esse padrão escondeu no
@@ -267,14 +375,41 @@ pytest default. Nenhum teste de CI usará processo ou credencial real.
 Stack inicial aprovada:
 
 - Python 3.12+ e `uv`;
-- FastMCP como framework MCP;
+- FastMCP `>=3.4.5,<4` como framework MCP;
 - HTTPX para transporte assíncrono;
 - Pydantic e `pydantic-settings` para contratos e configuração;
 - keyring para custódia local futura;
 - Ruff, ty, pytest e pytest-cov para gates locais.
+- `okf-parser`, fixado em versão exata, para validação e auditoria de
+  conhecimento.
 
 Novas dependências precisam de consumidor imediato. Não serão adicionados
 framework de retry, DI, CLI, logging ou result types antes de uma lacuna real.
+
+A linha 4.x estava em beta durante esta revisão de 2026 e muda a base para MCP
+Python SDK v2 e protocolo `2026-07-28`. O `suj` não adotará prerelease por
+resolução acidental. Migrar para 4.x exigirá RFC curta, catálogo comparado e
+testes de contrato passando nos dois lados da atualização.
+
+## Revisão de práticas FastMCP — fontes de 2026
+
+A arquitetura foi confrontada com documentação e releases oficiais disponíveis
+em 2026. O resultado é:
+
+| Tema | RFC antes da revisão | Evidência oficial de 2026 | Decisão |
+| --- | --- | --- | --- |
+| Defaults | FastMCP-first | O framework deriva schemas, structured output e validação de Python idiomático | Mantido e elevado a heurística normativa |
+| Dependências | Client no lifespan | `Depends()` exclui dependências runtime do schema público | Lifespan para recurso compartilhado; DI para dependência por request |
+| Lifecycle | Cleanup previsto | Lifespan 3.x executa uma vez e recomenda `try/finally` | Tornado obrigatório |
+| Testes | Client vivo previsto | A documentação recomenda `Client` in-process + `pytest-asyncio` | Adicionados à stack e aos gates |
+| Erros | Exceções tipadas | `mask_error_details` protege falhas internas; `ToolError` libera mensagem intencional | Mascarar por default e limitar `ToolError` a mensagens seguras |
+| Schemas | Pydantic direto | FastMCP gera e dereferencia output schemas por default | Não customizar nem desligar sem consumidor real |
+| Timeouts | HTTPX explícito | FastMCP 3.x oferece timeout por tool | Usar ambas as camadas |
+| Middleware | Só transversal | Documentação reserva middleware a autenticação, logging e rate limit; transforms a mudanças de componentes | Mantido; middleware não carrega regra específica de uma tool |
+| Autorização | Política futura | OAuth/auth checks funcionam em HTTP e são ignorados em stdio | Nunca tratá-los como barreira de escrita em stdio |
+| Transforms | Preferir nativos | FastMCP 3.x fornece namespace, tool transform, visibility e tool search | Built-in antes de transform próprio; nenhum transform preventivo |
+| HTTP security | Allowlist prevista | Releases 3.4.x corrigiram SSRF, OAuth, Host/Origin e CVE de Starlette | Fixar linha corrigida e exigir configuração explícita no deployment |
+| Major version | Não definido | FastMCP 4 beta troca SDK e suporta protocolo `2026-07-28` | Permanecer em 3.x estável até RFC de migração |
 
 ## Releases e documentação
 
@@ -294,6 +429,7 @@ framework de retry, DI, CLI, logging ou result types antes de uma lacuna real.
 - criar Settings com rede e escrita desabilitadas;
 - definir hierarquia de erros e contratos básicos;
 - instalar CI e gates de catálogo;
+- validar o bundle OKF e exigir specifications para todos os tipos;
 - manter somente `suj_status`.
 
 ### Fase 1 — protocolo como fixtures
@@ -331,6 +467,8 @@ Uma mudança deve ser rejeitada se introduzir:
 - rede no import ou no pytest default;
 - abstração antes do segundo caso concreto;
 - override de default FastMCP sem requisito reproduzível;
+- Markdown conceitual sem tipo ou tipo sem specification normativa;
+- projeção OKF tratada como fonte de verdade ou dependência de runtime;
 - supressão de lint/type check para contornar desenho ruim.
 
 ## Questões deliberadamente abertas
@@ -359,3 +497,14 @@ consulta remota ou protocolo de petições.
 - [`todos` RFC 0019: práticas aprendidas com o Pink](https://github.com/franklinbaldo/todos/blob/main/docs/rfc/0019-adotar-praticas-pink.md)
 - [`todos` RFC 0029: reconfirmação pós-escrita](https://github.com/franklinbaldo/todos/blob/main/docs/rfc/0029-reconfirmacao-pos-post-generica.md)
 - [`todos` RFC 0035: FastMCP-first](https://github.com/franklinbaldo/todos/blob/main/docs/rfc/0035-nucleo-semantico-de-operacoes.md)
+- [`okf-parser`: formato, validação e relações](https://github.com/franklinbaldo/okf-parser)
+- [`okf-parser`: fronteira entre bundle estrito e adapters](https://github.com/franklinbaldo/okf-parser/blob/main/docs/architecture.md)
+- [FastMCP: server e defaults](https://gofastmcp.com/servers/server)
+- [FastMCP: tools, schemas, erros e timeouts](https://gofastmcp.com/servers/tools)
+- [FastMCP: dependency injection](https://gofastmcp.com/servers/dependency-injection)
+- [FastMCP: lifespans](https://gofastmcp.com/servers/lifespan)
+- [FastMCP: middleware](https://gofastmcp.com/servers/middleware)
+- [FastMCP: transforms](https://gofastmcp.com/servers/transforms/transforms)
+- [FastMCP: autorização](https://gofastmcp.com/servers/authorization)
+- [FastMCP: testes](https://gofastmcp.com/patterns/testing)
+- [FastMCP: releases de 2026](https://github.com/PrefectHQ/fastmcp/releases)
