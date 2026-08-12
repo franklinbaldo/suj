@@ -13,13 +13,13 @@ limites e critérios de adoção.
 
 ## Campos obrigatórios
 
-| Campo | Tipo | Significado |
-| --- | --- | --- |
-| `type` | string | Sempre `RFC` |
-| `number` | integer | Número estável da decisão |
-| `status` | string | `proposed`, `accepted`, `rejected` ou `superseded` |
-| `date` | date | Data da proposta |
-| `title` | string | Título da decisão |
-| `author` | string | Autor responsável |
+| Campo    | Tipo    | Significado                                        |
+| -------- | ------- | -------------------------------------------------- |
+| `type`   | string  | Sempre `RFC`                                       |
+| `number` | integer | Número estável da decisão                          |
+| `status` | string  | `proposed`, `accepted`, `rejected` ou `superseded` |
+| `date`   | date    | Data da proposta                                   |
+| `title`  | string  | Título da decisão                                  |
+| `author` | string  | Autor responsável                                  |
 
 Um RFC substituído deve apontar por link Markdown para a decisão sucessora.

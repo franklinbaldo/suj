@@ -13,10 +13,10 @@ Documento normativo que define um tipo de conceito usado pelo bundle OKF do
 
 ## Campos obrigatórios
 
-| Campo | Tipo | Significado |
-| --- | --- | --- |
-| `type` | string | Sempre `okf-type-spec` |
-| `filename` | string | Nome derivado esperado para a specification |
-| `title` | string | Título legível |
-| `description` | string | Propósito do tipo especificado |
-| `resource` | string | Identidade lógica do tipo |
+| Campo         | Tipo   | Significado                                 |
+| ------------- | ------ | ------------------------------------------- |
+| `type`        | string | Sempre `okf-type-spec`                      |
+| `filename`    | string | Nome derivado esperado para a specification |
+| `title`       | string | Título legível                              |
+| `description` | string | Propósito do tipo especificado              |
+| `resource`    | string | Identidade lógica do tipo                   |

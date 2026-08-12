@@ -74,10 +74,13 @@ Os termos **DEVE**, **NÃO DEVE** e **PODE** são normativos.
 ### 1. FastMCP-first
 
 - A função Python publicada como tool é a unidade pública executável.
+
 - O FastMCP DEVE derivar input schema, output schema e structured content.
+
 - O default do FastMCP DEVE ser aceito sempre que satisfizer o requisito. Não
   configuraremos preventivamente comportamento que ainda não causou um
   problema concreto.
+
 - Quando o default não bastar, a ordem obrigatória de decisão será:
 
   1. default do FastMCP sem customização;
@@ -89,8 +92,10 @@ Os termos **DEVE**, **NÃO DEVE** e **PODE** são normativos.
 
 - Pular uma etapa exige registrar no PR o requisito não atendido e o teste que
   demonstra a lacuna.
+
 - O projeto NÃO DEVE criar registry, decorator, descriptor `Operation`, schema
   resolver, envelope MCP ou protocolo de tool paralelo.
+
 - Metadata local reutilizável PODE existir apenas como constantes nativas do
   MCP/FastMCP, sem formar um segundo catálogo.
 
@@ -354,8 +359,7 @@ O CI terá um único script local canônico e executará:
 8. verificação de que todos os modelos públicos geram `outputSchema` útil;
 9. teste de que erros não retornam conteúdo com formato de sucesso;
 10. teste de ausência de rede em toda a suíte unitária;
-11. `okf-parser check . --require-spec 'specs/okf-types/{slug}.md'
-    --normative-spec`;
+11. `okf-parser check . --require-spec 'specs/okf-types/{slug}.md' --normative-spec`;
 12. auditorias relacionais OKF específicas, quando existirem.
 
 Os testes de contrato MCP usarão `fastmcp.Client` diretamente sobre a instância
@@ -396,20 +400,20 @@ testes de contrato passando nos dois lados da atualização.
 A arquitetura foi confrontada com documentação e releases oficiais disponíveis
 em 2026. O resultado é:
 
-| Tema | RFC antes da revisão | Evidência oficial de 2026 | Decisão |
-| --- | --- | --- | --- |
-| Defaults | FastMCP-first | O framework deriva schemas, structured output e validação de Python idiomático | Mantido e elevado a heurística normativa |
-| Dependências | Client no lifespan | `Depends()` exclui dependências runtime do schema público | Lifespan para recurso compartilhado; DI para dependência por request |
-| Lifecycle | Cleanup previsto | Lifespan 3.x executa uma vez e recomenda `try/finally` | Tornado obrigatório |
-| Testes | Client vivo previsto | A documentação recomenda `Client` in-process + `pytest-asyncio` | Adicionados à stack e aos gates |
-| Erros | Exceções tipadas | `mask_error_details` protege falhas internas; `ToolError` libera mensagem intencional | Mascarar por default e limitar `ToolError` a mensagens seguras |
-| Schemas | Pydantic direto | FastMCP gera e dereferencia output schemas por default | Não customizar nem desligar sem consumidor real |
-| Timeouts | HTTPX explícito | FastMCP 3.x oferece timeout por tool | Usar ambas as camadas |
-| Middleware | Só transversal | Documentação reserva middleware a autenticação, logging e rate limit; transforms a mudanças de componentes | Mantido; middleware não carrega regra específica de uma tool |
-| Autorização | Política futura | OAuth/auth checks funcionam em HTTP e são ignorados em stdio | Nunca tratá-los como barreira de escrita em stdio |
-| Transforms | Preferir nativos | FastMCP 3.x fornece namespace, tool transform, visibility e tool search | Built-in antes de transform próprio; nenhum transform preventivo |
-| HTTP security | Allowlist prevista | Releases 3.4.x corrigiram SSRF, OAuth, Host/Origin e CVE de Starlette | Fixar linha corrigida e exigir configuração explícita no deployment |
-| Major version | Não definido | FastMCP 4 beta troca SDK e suporta protocolo `2026-07-28` | Permanecer em 3.x estável até RFC de migração |
+| Tema          | RFC antes da revisão | Evidência oficial de 2026                                                                                  | Decisão                                                              |
+| ------------- | -------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Defaults      | FastMCP-first        | O framework deriva schemas, structured output e validação de Python idiomático                             | Mantido e elevado a heurística normativa                             |
+| Dependências  | Client no lifespan   | `Depends()` exclui dependências runtime do schema público                                                  | Lifespan para recurso compartilhado; DI para dependência por request |
+| Lifecycle     | Cleanup previsto     | Lifespan 3.x executa uma vez e recomenda `try/finally`                                                     | Tornado obrigatório                                                  |
+| Testes        | Client vivo previsto | A documentação recomenda `Client` in-process + `pytest-asyncio`                                            | Adicionados à stack e aos gates                                      |
+| Erros         | Exceções tipadas     | `mask_error_details` protege falhas internas; `ToolError` libera mensagem intencional                      | Mascarar por default e limitar `ToolError` a mensagens seguras       |
+| Schemas       | Pydantic direto      | FastMCP gera e dereferencia output schemas por default                                                     | Não customizar nem desligar sem consumidor real                      |
+| Timeouts      | HTTPX explícito      | FastMCP 3.x oferece timeout por tool                                                                       | Usar ambas as camadas                                                |
+| Middleware    | Só transversal       | Documentação reserva middleware a autenticação, logging e rate limit; transforms a mudanças de componentes | Mantido; middleware não carrega regra específica de uma tool         |
+| Autorização   | Política futura      | OAuth/auth checks funcionam em HTTP e são ignorados em stdio                                               | Nunca tratá-los como barreira de escrita em stdio                    |
+| Transforms    | Preferir nativos     | FastMCP 3.x fornece namespace, tool transform, visibility e tool search                                    | Built-in antes de transform próprio; nenhum transform preventivo     |
+| HTTP security | Allowlist prevista   | Releases 3.4.x corrigiram SSRF, OAuth, Host/Origin e CVE de Starlette                                      | Fixar linha corrigida e exigir configuração explícita no deployment  |
+| Major version | Não definido         | FastMCP 4 beta troca SDK e suporta protocolo `2026-07-28`                                                  | Permanecer em 3.x estável até RFC de migração                        |
 
 ## Releases e documentação
 
