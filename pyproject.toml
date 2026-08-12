@@ -1,0 +1,49 @@
+[project]
+name = "suj"
+version = "0.1.0"
+description = "Integração experimental e não oficial com serviços do jus.br para pesquisa acadêmica"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Franklin Baldo" }]
+dependencies = [
+    "fastmcp",
+    "httpx",
+    "keyring",
+    "pydantic>=2",
+    "pydantic-settings",
+]
+
+[project.scripts]
+suj = "suj.server:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "ty",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["COM812", "D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["suj"]
